@@ -1,6 +1,7 @@
 import 'package:aiqap/feature/book_page/ui/page/book_page.dart';
 import 'package:aiqap/feature/downloaded_books/ui/page/downloaded_books_page.dart';
 import 'package:aiqap/feature/main_page/ui/page/main_page.dart';
+import 'package:aiqap/feature/playing_now/ui/page/playing_now_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -13,11 +14,13 @@ class App extends StatefulWidget {
 }
 
 class _AppState extends State<App> {
+  GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();
   int _currentPage = 0;
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: navigatorKey,
       onGenerateRoute: (settings) {
         if (settings.name == "/book_page") {
           List args = settings.arguments;
@@ -26,6 +29,10 @@ class _AppState extends State<App> {
               bookId: args[0],
             ),
           );
+        }
+
+        if (settings.name == '/playing_now') {
+          return MaterialPageRoute(builder: (context) => PlayingNowPage());
         }
         return MaterialPageRoute(builder: (context) => Scaffold());
       },
@@ -36,7 +43,7 @@ class _AppState extends State<App> {
           resizeToAvoidBottomPadding: true,
           floatingActionButton: audioPlayer(),
           floatingActionButtonLocation:
-              FloatingActionButtonLocation.centerFloat,
+              FloatingActionButtonLocation.centerDocked,
           bottomNavigationBar: bottomNavigationBar(),
           body: buildBody(),
         ),
@@ -53,18 +60,20 @@ class _AppState extends State<App> {
   }
 
   Widget bottomNavigationBar() {
-    return BottomNavigationBar(
-      currentIndex: _currentPage,
-      backgroundColor: Colors.white,
-      showSelectedLabels: false,
-      showUnselectedLabels: false,
-      selectedItemColor: Colors.amber,
-      onTap: (index) {
-        setState(() {
-          _currentPage = index;
-        });
-      },
-      items: navigations(),
+    return BottomAppBar(
+      child: BottomNavigationBar(
+        currentIndex: _currentPage,
+        backgroundColor: Colors.white,
+        showSelectedLabels: false,
+        showUnselectedLabels: false,
+        selectedItemColor: Colors.amber,
+        onTap: (index) {
+          setState(() {
+            _currentPage = index;
+          });
+        },
+        items: navigations(),
+      ),
     );
   }
 
@@ -82,66 +91,31 @@ class _AppState extends State<App> {
   }
 
   Widget audioPlayer() {
-    return Container(
-      margin: EdgeInsets.all(0),
-      height: ScreenUtil().setHeight(200.0),
-      width: double.infinity,
-      decoration: BoxDecoration(color: Colors.white),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Container(
-            height: double.infinity,
-            width: ScreenUtil().setWidth(400.0),
-            decoration: BoxDecoration(
-              border: Border.all(
-                width: ScreenUtil().setHeight(3),
-                color: Colors.grey[300],
+    return InkWell(
+      onTap: () {
+        navigatorKey.currentState.pushNamed("/playing_now");
+      },
+      child: Container(
+        margin: EdgeInsets.all(0),
+        height: ScreenUtil().setHeight(200.0),
+        width: ScreenUtil().setHeight(200.0),
+        decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(
+              ScreenUtil().setHeight(100.0),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.4),
+                blurRadius: ScreenUtil().setHeight(100.0),
               ),
-            ),
-            child: Center(
-              child: Text("Абай жолы"),
-            ),
+            ]),
+        child: Center(
+          child: SvgPicture.asset(
+            "assets/icons/play.svg",
+            color: Color.fromRGBO(192, 96, 70, 1),
           ),
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    SvgPicture.asset(
-                      "assets/icons/prev.svg",
-                      color: Colors.black,
-                    ),
-                    SvgPicture.asset(
-                      "assets/icons/pause.svg",
-                      color: Colors.black,
-                    ),
-                    SvgPicture.asset(
-                      "assets/icons/next.svg",
-                      color: Colors.black,
-                    ),
-                  ],
-                ),
-                Stack(
-                  children: [
-                    Container(
-                      width: ScreenUtil().setHeight(600),
-                      height: ScreenUtil().setHeight(15),
-                      color: Colors.grey[300],
-                    ),
-                    Container(
-                      width: ScreenUtil().setHeight(300),
-                      height: ScreenUtil().setHeight(15),
-                      color: Colors.green,
-                    ),
-                  ],
-                )
-              ],
-            ),
-          )
-        ],
+        ),
       ),
     );
   }
