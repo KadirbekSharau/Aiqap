@@ -42,6 +42,24 @@ class _BookPageState extends State<BookPage> {
           ),
           Column(
             children: [
+              SizedBox(height: ScreenUtil().setHeight(100.0)),
+              Padding(
+                padding: EdgeInsets.symmetric(
+                    horizontal: ScreenUtil().setHeight(50.0)),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    InkWell(
+                      onTap: () => Navigator.pop(context),
+                      child: Icon(
+                        Icons.arrow_back_ios_rounded,
+                        size: ScreenUtil().setHeight(100.0),
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               imageContainer(),
               SizedBox(height: ScreenUtil().setHeight(100.0)),
               dataContainer(),
@@ -55,34 +73,36 @@ class _BookPageState extends State<BookPage> {
   Widget imageContainer() {
     return Column(
       children: [
-        SizedBox(height: ScreenUtil().setHeight(200.0)),
-        BackdropFilter(
-          filter: ImageFilter.blur(
-            sigmaX: 18.0,
-            sigmaY: 18.0,
-          ),
-          child: Container(
-            height: ScreenUtil().setHeight(800.0),
-            width: ScreenUtil().setHeight(800.0),
-            decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+        SizedBox(height: ScreenUtil().setHeight(50.0)),
+        ClipRRect(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(
+              sigmaX: 18.0,
+              sigmaY: 18.0,
+            ),
+            child: Container(
+              height: ScreenUtil().setHeight(800.0),
+              width: ScreenUtil().setHeight(800.0),
+              decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(
+                    ScreenUtil().setHeight(30.0),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.5),
+                      blurRadius: ScreenUtil().setHeight(100.0),
+                      spreadRadius: ScreenUtil().setHeight(100.0),
+                    ),
+                  ]),
+              child: ClipRRect(
                 borderRadius: BorderRadius.circular(
                   ScreenUtil().setHeight(30.0),
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.5),
-                    blurRadius: ScreenUtil().setHeight(100.0),
-                    spreadRadius: ScreenUtil().setHeight(100.0),
-                  ),
-                ]),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(
-                ScreenUtil().setHeight(30.0),
-              ),
-              child: Image.asset(
-                "assets/abay_path.png",
-                fit: BoxFit.cover,
+                child: Image.asset(
+                  "assets/abay_path.png",
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
           ),
@@ -97,19 +117,29 @@ class _BookPageState extends State<BookPage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          SvgPicture.asset(
-            "assets/icons/download.svg",
-            height: ScreenUtil().setHeight(100.0),
-            color: Colors.black,
+          InkWell(
+            onTap: () {},
+            child: SvgPicture.asset(
+              "assets/icons/download.svg",
+              height: ScreenUtil().setHeight(80.0),
+              color: Colors.black,
+            ),
           ),
-          SvgPicture.asset(
-            "assets/icons/play.svg",
-            height: ScreenUtil().setHeight(170.0),
+          InkWell(
+            onTap: () {},
+            child: SvgPicture.asset(
+              "assets/icons/play.svg",
+              height: ScreenUtil().setHeight(130.0),
+              color: Color.fromRGBO(192, 96, 70, 1),
+            ),
           ),
-          SvgPicture.asset(
-            "assets/icons/share.svg",
-            height: ScreenUtil().setHeight(100.0),
-            color: Colors.black,
+          InkWell(
+            onTap: () {},
+            child: SvgPicture.asset(
+              "assets/icons/share.svg",
+              height: ScreenUtil().setHeight(80.0),
+              color: Colors.black,
+            ),
           ),
         ],
       ),
@@ -151,20 +181,23 @@ class _BookPageState extends State<BookPage> {
   }
 
   Widget descriptionText() {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: ScreenUtil().setHeight(50.0)),
-        child: Column(
-          children: [
-            Text(
-              "'Қаһар' романы – 'Көшпенділер' трилогиясының үшінші кітабы. Роман – қазақ тарихи романистикасының үздік табысы, шоқтығы биік туынды. Қазақ әдебиеті тарихында құбылыс болған ел тағдырын шыншылдықпен бейнелеген халықтық көркем шығарма. Роман авторы – Ілияс Есенберлин.",
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: ScreenUtil().setSp(50.0),
-              ),
-              textAlign: TextAlign.center,
-            )
-          ],
+    return Expanded(
+      child: SingleChildScrollView(
+        child: Padding(
+          padding:
+              EdgeInsets.symmetric(horizontal: ScreenUtil().setHeight(50.0)),
+          child: Column(
+            children: [
+              Text(
+                "'Қаһар' романы – 'Көшпенділер' трилогиясының үшінші кітабы. Роман – қазақ тарихи романистикасының үздік табысы, шоқтығы биік туынды. Қазақ әдебиеті тарихында құбылыс болған ел тағдырын шыншылдықпен бейнелеген халықтық көркем шығарма. Роман авторы – Ілияс Есенберлин.",
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: ScreenUtil().setSp(50.0),
+                ),
+                textAlign: TextAlign.center,
+              )
+            ],
+          ),
         ),
       ),
     );

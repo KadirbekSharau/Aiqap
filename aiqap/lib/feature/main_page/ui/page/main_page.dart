@@ -1,4 +1,10 @@
+import 'package:aiqap/feature/main_page/bloc/main_page_bloc.dart';
+import 'package:aiqap/feature/main_page/bloc/main_page_event.dart';
+import 'package:aiqap/feature/main_page/bloc/main_page_state.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:aiqap/feature/main_page/model/book.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class MainPage extends StatefulWidget {
   MainPage({Key key}) : super(key: key);
@@ -8,94 +14,126 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
+  MainPageBloc mainPageBloc = MainPageBloc();
+
+  @override
+  void initState() {
+    mainPageBloc.add(FetchGanresEvent());
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    mainPageBloc.close();
+    super.dispose();
+  }
+
+  void navigateToBook(Book book) {
+    Navigator.pushNamed(context, "/book_page", arguments: [book.id]);
+    FocusScope.of(context).unfocus();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.grey[100],
-        title: Text("Main page", style: TextStyle(color: Colors.black)),
-      ),
-      body: Container(
-        margin: EdgeInsets.only(top: 50),
-        child: Column(
-          children: [
-            Expanded(
-              child: Container(
-                // padding: EdgeInsets.only(
-                //   top: 50,
-                //   left: 50,
-                // ),
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  // borderRadius: BorderRadius.only(
-                  //   topLeft: Radius.circular(50),
-                  //   topRight: Radius.circular(50),
-                  // ),
-                ),
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      BookSection(
-                        heading: "Танымал кітаптар",
-                      ),
-                      BookSection(
-                        heading: "Шытырман оқиға",
-                      ),
-                      BookSection(
-                        heading: "Драма",
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            )
-          ],
+    return BlocProvider(
+      create: (context) => mainPageBloc,
+      child: Scaffold(
+        body: Container(
+          margin: EdgeInsets.only(top: 50),
+          child: Column(
+            children: [
+              searchBar(),
+              Expanded(
+                child: Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                    ),
+                    child: BlocConsumer<MainPageBloc, MainPageState>(
+                      listener: (context, state) {},
+                      builder: (context, state) {
+                        if (state is ErrorMainPageState) {
+                          return Center(
+                            child: Text(
+                              "${state.error}",
+                              textAlign: TextAlign.center,
+                            ),
+                          );
+                        }
+                        if (state is LoadingMainPageState) {
+                          return Center(child: CircularProgressIndicator());
+                        }
+                        if (state is FetchedBooksByGanreState) {
+                          return SingleChildScrollView(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                    SizedBox(
+                                        height: ScreenUtil().setHeight(100.0)),
+                                    Container()
+                                  ] +
+                                  state.ganres
+                                      .map(
+                                        (e) => bookSection(
+                                          heading: e.janre,
+                                          bookList: e.books,
+                                        ),
+                                      )
+                                      .toList(),
+                            ),
+                          );
+                        }
+                        return Container();
+                      },
+                    )),
+              )
+            ],
+          ),
         ),
       ),
     );
   }
-}
 
-class Book {
-  final String name;
-  final String author;
-  final String coverImage;
-  final double rating;
+  Widget searchBar() {
+    return Container(
+      height: ScreenUtil().setHeight(130.0),
+      width: double.infinity,
+      color: Colors.white,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: EdgeInsets.only(right: ScreenUtil().setHeight(30.0)),
+            width: ScreenUtil().setHeight(1000.0),
+            decoration: BoxDecoration(
+              color: Color.fromRGBO(242, 242, 242, 1),
+              border: Border.all(
+                  width: ScreenUtil().setHeight(3), color: Colors.grey[400]),
+              borderRadius: BorderRadius.circular(
+                ScreenUtil().setHeight(40.0),
+              ),
+            ),
+            child: TextField(
+              autofocus: false,
+              decoration: InputDecoration(
+                border: InputBorder.none,
+                hintText: "іздеу",
+                hintStyle: TextStyle(
+                  color: Colors.grey[500],
+                ),
+                prefixIcon: Icon(Icons.search_rounded),
+                focusedBorder: InputBorder.none,
+                enabledBorder: InputBorder.none,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-  Book({this.author, this.coverImage, this.name, this.rating});
-}
-
-List<Book> _recentBooks = [
-  Book(
-      name: "Conjure Women",
-      author: "Afia Atakora",
-      coverImage: "assets/abay_path.png",
-      rating: 4.0),
-  Book(
-      name: "Felix Ever After",
-      author: "Kacen Callender",
-      coverImage: "assets/abay_path.png",
-      rating: 4.0),
-];
-List<Book> get recentBooks {
-  return [..._recentBooks];
-}
-
-class BookSection extends StatelessWidget {
-  final String heading;
-  BookSection({this.heading});
-  @override
-  Widget build(BuildContext context) {
-    List<Book> bookList;
-    if (heading == "Танымал кітаптар") {
-      bookList = recentBooks;
-    } else if (heading == "Шытырман оқиға") {
-      bookList = recentBooks;
-    } else if (heading == "Драма") {
-      bookList = recentBooks;
-    }
+  Widget bookSection(
+      {@required String heading, @required List<Book> bookList}) {
     return Container(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -114,23 +152,13 @@ class BookSection extends StatelessWidget {
             height: MediaQuery.of(context).size.height * 0.25,
             child: ListView.builder(
               itemBuilder: (ctx, i) => GestureDetector(
-                // onTap: () => Navigator.push(
-                //   context,
-                //   MaterialPageRoute(
-                //     builder: (ctx) => BooksDetails(
-                //       index: i,
-                //       section: heading,
-                //     ),
-                //   ),
-                // ),
                 child: Row(
                   children: [
                     Column(
                       children: [
                         InkWell(
                           onTap: () {
-                            Navigator.pushNamed(context, "/book_page",
-                                arguments: [0]);
+                            navigateToBook(bookList[i]);
                           },
                           child: Container(
                             height: MediaQuery.of(context).size.height * 0.21,
@@ -155,14 +183,15 @@ class BookSection extends StatelessWidget {
                                                 topRight: Radius.circular(20))),
                                       ),
                                       Container(
-                                          alignment: Alignment.bottomLeft,
-                                          child: Text(
-                                            'Абай жолы',
-                                            style: TextStyle(
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 22.0),
-                                          )),
+                                        alignment: Alignment.bottomLeft,
+                                        child: Text(
+                                          'Абай жолы',
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 22.0),
+                                        ),
+                                      ),
                                     ],
                                   ),
                                 ),
