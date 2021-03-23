@@ -13,10 +13,7 @@ class _MainPageState extends State<MainPage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.grey[100],
-        title: Text("Main page",
-            style:TextStyle(
-            color: Colors.black
-            )),
+        title: Text("Main page", style: TextStyle(color: Colors.black)),
       ),
       body: Container(
         margin: EdgeInsets.only(top: 50),
@@ -130,43 +127,49 @@ class BookSection extends StatelessWidget {
                   children: [
                     Column(
                       children: [
-                        Container(
-                          height: MediaQuery.of(context).size.height * 0.21,
-                          width: MediaQuery.of(context).size.width * 0.63,
-                          child: Stack(
-                            children: [
-                              Container(
-                                width: double.infinity,
-
-                                child: Stack(
-                                  children: <Widget>[
-                                    Container(
-                                      alignment: Alignment.center,
-                                      child: Image.asset(
-                                        'assets/abay_path.png',
-                                        height: 250,
-                                        width: double.infinity,
-                                        fit: BoxFit.cover,
-
+                        InkWell(
+                          onTap: () {
+                            Navigator.pushNamed(context, "/book_page",
+                                arguments: [0]);
+                          },
+                          child: Container(
+                            height: MediaQuery.of(context).size.height * 0.21,
+                            width: MediaQuery.of(context).size.width * 0.63,
+                            child: Stack(
+                              children: [
+                                Container(
+                                  width: double.infinity,
+                                  child: Stack(
+                                    children: <Widget>[
+                                      Container(
+                                        alignment: Alignment.center,
+                                        child: Image.asset(
+                                          'assets/abay_path.png',
+                                          height: 250,
+                                          width: double.infinity,
+                                          fit: BoxFit.cover,
+                                        ),
+                                        decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.only(
+                                                topLeft: Radius.circular(20.0),
+                                                topRight: Radius.circular(20))),
                                       ),
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.only(topLeft: Radius.circular(20.0), topRight: Radius.circular(20))
-                                      ),
-                                    ),
-                                    Container(
-                                        alignment: Alignment.bottomLeft,
-                                        child: Text(
-                                          'Абай жолы',
-                                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 22.0),
-                                        )),
-                                  ],
+                                      Container(
+                                          alignment: Alignment.bottomLeft,
+                                          child: Text(
+                                            'Абай жолы',
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 22.0),
+                                          )),
+                                    ],
+                                  ),
                                 ),
-                              ),
-
-                            ],
+                              ],
+                            ),
                           ),
                         ),
-
                       ],
                     ),
                     SizedBox(
