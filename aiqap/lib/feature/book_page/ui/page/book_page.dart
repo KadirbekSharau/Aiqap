@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/screen_util.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:aiqap/feature/playing_now/ui/page/playing_now_page.dart';
 
 class BookPage extends StatefulWidget {
   final int bookId;
@@ -126,7 +127,10 @@ class _BookPageState extends State<BookPage> {
             ),
           ),
           InkWell(
-            onTap: () {},
+            onTap: () {Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => PlayingNowPage()),
+            );},
             child: SvgPicture.asset(
               "assets/icons/play.svg",
               height: ScreenUtil().setHeight(130.0),
