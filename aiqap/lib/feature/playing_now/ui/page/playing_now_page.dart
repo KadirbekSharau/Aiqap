@@ -1,28 +1,122 @@
+import 'package:aiqap/feature/playing_now/bloc/audio_bloc.dart';
+import 'package:aiqap/feature/playing_now/bloc/audio_event.dart';
+import 'package:aiqap/feature/playing_now/bloc/audio_state.dart';
+import 'package:audioplayers/audio_cache.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
-import 'package:aiqap/feature/main_page/model/book.dart';
 import 'dart:ui';
 
-import 'package:flutter/material.dart';
-import 'dart:math';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
-class PlayingNowPage extends StatelessWidget {
-  List<int> Heights = [];
-  List<Book> bookList;
+class PlayingNowPage extends StatefulWidget {
   final int index;
-  final String section;
 
-  PlayingNowPage({this.index, this.section});
+  PlayingNowPage({this.index});
+
+  @override
+  _PlayingNowPageState createState() => _PlayingNowPageState();
+}
+
+class _PlayingNowPageState extends State<PlayingNowPage> {
+  AudioBloc audioBloc;
+  List<int> heights = [];
+
+  Duration _duration = new Duration();
+  Duration _position = new Duration();
+  Duration _slider = new Duration(seconds: 0);
+  double durationValue;
+  bool isPlaying = false;
+
+  @override
+  void initState() {
+    audioBloc = BlocProvider.of<AudioBloc>(context);
+    _position = _slider;
+    initials();
+    audioBloc.audioPlayer.onAudioPositionChanged.listen((event) {
+      if (mounted) {
+        setState(() {
+          _position = event;
+        });
+      }
+    });
+    audioBloc.audioPlayer.onDurationChanged.listen(
+      (event) {
+        if (mounted) {
+          setState(
+            () {
+              _duration = event;
+            },
+          );
+        }
+      },
+    );
+    super.initState();
+  }
+
+  @override
+  dispose() {
+    audioBloc.audioPlayer.onAudioPositionChanged.drain();
+    audioBloc.audioPlayer.onDurationChanged.drain();
+    super.dispose();
+  }
+
+  initials() async {
+    _duration = Duration(days: 1);
+    _position =
+        Duration(seconds: await audioBloc.audioPlayer.getCurrentPosition());
+  }
+
+  playAudio() async {
+    audioBloc.add(PlayAudioEvent());
+    print("audio");
+    if (mounted) {
+      setState(() {
+        isPlaying = true;
+      });
+    }
+    await audioBloc.audioPlayer
+        .play("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3");
+  }
+
+  pauseAudio() async {
+    audioBloc.add(StopAudioEvent());
+    if (mounted) {
+      setState(() {
+        isPlaying = false;
+      });
+    }
+    await audioBloc.audioPlayer.pause();
+  }
+
+  stopAudio() async {
+    audioBloc.add(StopAudioEvent());
+    if (mounted) {
+      setState(() {
+        isPlaying = false;
+      });
+    }
+    await audioBloc.audioPlayer.stop();
+  }
+
+  resume() async {
+    audioBloc.add(PlayAudioEvent());
+    if (mounted) {
+      setState(() {
+        isPlaying = true;
+      });
+    }
+    await audioBloc.audioPlayer.resume();
+  }
+
+  seek(value) async {
+    print("seeking to $value");
+    await audioBloc.audioPlayer.seek(Duration(milliseconds: value * 1000));
+  }
 
   @override
   Widget build(BuildContext context) {
-    for (int i = 0; i < MediaQuery.of(context).size.width / 9.3; i++) {
-      Heights.add(50);
-    }
-    if (section == "Continue Reading") {
-      bookList = booksList;
-    } else if (section == "Discover More") {
-      bookList = booksList;
-    }
     return Scaffold(
       body: Container(
         height: MediaQuery.of(context).size.height,
@@ -93,7 +187,6 @@ class PlayingNowPage extends StatelessWidget {
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(20),
                             child: Image.asset(
-                              // "assets/images/0.jfif",
                               'assets/abay_path.png',
                               fit: BoxFit.fill,
                             ),
@@ -119,7 +212,6 @@ class PlayingNowPage extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    // "Conjure Women",
                     "Мұхтар Әуезов",
                     style: TextStyle(
                       fontSize: 30,
@@ -157,6 +249,13 @@ class PlayingNowPage extends StatelessWidget {
                               fontWeight: FontWeight.w700,
                             ),
                           ),
+                          Slider(
+                            value: _position.inSeconds.toDouble(),
+                            max: _duration.inSeconds.toDouble(),
+                            activeColor: Colors.orange,
+                            inactiveColor: Colors.grey,
+                            onChanged: (value) => seek(value.toInt()),
+                          ),
                           Column(
                             children: [
                               Container(
@@ -164,39 +263,24 @@ class PlayingNowPage extends StatelessWidget {
                                 width: MediaQuery.of(context).size.width,
                                 child: ListView.builder(
                                   itemBuilder: (ctx, i) => Bars(
-                                    height: Heights[i].toDouble(),
-                                    color: i < Heights.length / 2
+                                    height: heights[i].toDouble(),
+                                    color: i < heights.length / 2
                                         ? Color(0xffc44536)
                                         : Colors.redAccent.withOpacity(0.5),
                                   ),
-                                  itemCount: Heights.length,
+                                  itemCount: heights.length,
                                   scrollDirection: Axis.horizontal,
                                 ),
                               ),
                               SizedBox(
                                 height: 20,
                               ),
-                              Row(
-                                mainAxisAlignment:
-                                MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text("01:33"),
-                                  Text("08:47"),
-                                ],
-                              ),
+                              timeDisplay(),
                             ],
                           ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
-                              IconButton(
-                                icon: Icon(
-                                  Icons.menu,
-                                  color: Colors.grey,
-                                  size: 32,
-                                ),
-                                onPressed: () {},
-                              ),
                               IconButton(
                                 icon: Icon(
                                   Icons.skip_previous,
@@ -205,22 +289,67 @@ class PlayingNowPage extends StatelessWidget {
                                 ),
                                 onPressed: () {},
                               ),
-                              Container(
-                                padding: EdgeInsets.only(
-                                  bottom: 16,
-                                  right: 15,
-                                ),
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Color(0xffc44536),
-                                ),
-                                child: IconButton(
-                                  icon: Icon(
-                                    Icons.pause,
-                                    color: Colors.white,
-                                    size: 48,
+                              InkWell(
+                                onTap: () {
+                                  if (isPlaying) {
+                                    pauseAudio();
+                                  } else {
+                                    if (_position.inSeconds > 0) {
+                                      resume();
+                                    } else {
+                                      playAudio();
+                                    }
+                                  }
+                                },
+                                child: Container(
+                                  margin: EdgeInsets.all(0),
+                                  height: ScreenUtil().setHeight(200.0),
+                                  width: ScreenUtil().setHeight(200.0),
+                                  decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(
+                                        ScreenUtil().setHeight(100.0),
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.2),
+                                          blurRadius:
+                                              ScreenUtil().setHeight(100.0),
+                                        ),
+                                      ]),
+                                  child: Center(
+                                    child: BlocConsumer<AudioBloc, AudioState>(
+                                      cubit: audioBloc,
+                                      listener: (context, state) {
+                                        if (state is PlayingAudioState) {
+                                          if (mounted) {
+                                            setState(() {
+                                              isPlaying = true;
+                                            });
+                                          }
+                                        } else {
+                                          if (mounted) {
+                                            setState(() {
+                                              isPlaying = false;
+                                            });
+                                          }
+                                        }
+                                      },
+                                      builder: (context, state) {
+                                        if (state is PlayingAudioState) {
+                                          return SvgPicture.asset(
+                                            "assets/icons/pause.svg",
+                                            color:
+                                                Color.fromRGBO(192, 96, 70, 1),
+                                          );
+                                        }
+                                        return SvgPicture.asset(
+                                          "assets/icons/play.svg",
+                                          color: Color.fromRGBO(192, 96, 70, 1),
+                                        );
+                                      },
+                                    ),
                                   ),
-                                  onPressed: () {},
                                 ),
                               ),
                               IconButton(
@@ -228,14 +357,6 @@ class PlayingNowPage extends StatelessWidget {
                                   Icons.skip_next,
                                   color: Colors.grey,
                                   size: 38,
-                                ),
-                                onPressed: () {},
-                              ),
-                              IconButton(
-                                icon: Icon(
-                                  Icons.more_horiz,
-                                  color: Colors.grey,
-                                  size: 32,
                                 ),
                                 onPressed: () {},
                               ),
@@ -251,6 +372,29 @@ class PlayingNowPage extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Widget timeDisplay() {
+    int mins = _position.inMinutes;
+    int secs = _position.inSeconds % 60;
+    int hours = _position.inHours;
+    int totalHours = _duration.inHours;
+    int totalMins = _duration.inMinutes % 60;
+    int totalSecs = _duration.inSeconds % 60;
+
+    String ph = hours < 10 ? "0$hours" : hours.toString();
+    String pm = mins < 10 ? "0$mins" : "$mins";
+    String ps = secs < 10 ? "0$secs" : "$secs";
+    String th = totalHours < 10 ? "0$totalHours" : totalHours.toString();
+    String tm = totalMins < 10 ? "0$totalMins" : "$totalMins";
+    String ts = totalSecs < 10 ? "0$totalSecs" : "$totalSecs";
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text("$ph:$pm:$ps"),
+        Text("$th:$tm:$ts"),
+      ],
     );
   }
 }
