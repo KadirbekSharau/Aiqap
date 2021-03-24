@@ -1,8 +1,6 @@
 import 'package:aiqap/feature/playing_now/bloc/audio_bloc.dart';
 import 'package:aiqap/feature/playing_now/bloc/audio_event.dart';
 import 'package:aiqap/feature/playing_now/bloc/audio_state.dart';
-import 'package:audioplayers/audio_cache.dart';
-import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'dart:ui';
 
@@ -28,6 +26,7 @@ class _PlayingNowPageState extends State<PlayingNowPage> {
   Duration _slider = new Duration(seconds: 0);
   double durationValue;
   bool isPlaying = false;
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -52,6 +51,9 @@ class _PlayingNowPageState extends State<PlayingNowPage> {
         }
       },
     );
+    audioBloc.audioPlayer.onPlayerError.listen((event) {
+      print("\nERROR $event\n\n");
+    });
     super.initState();
   }
 
@@ -69,50 +71,90 @@ class _PlayingNowPageState extends State<PlayingNowPage> {
   }
 
   playAudio() async {
-    audioBloc.add(PlayAudioEvent());
+    setState(() {
+      isLoading = true;
+    });
     print("audio");
     if (mounted) {
       setState(() {
         isPlaying = true;
       });
     }
-    await audioBloc.audioPlayer
-        .play("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3");
+    var result = await audioBloc.audioPlayer.play(
+        "http://19a2b2f35111.ngrok.io/media/audio/%D2%9A%D0%90%D0%98%D0%AB%D0%A0%D0%A1%D0%AB%D0%97_%D0%96%D2%B0%D0%9C%D0%90.mp3");
+
+    print("playing result $result");
+
+    setState(() {
+      isLoading = false;
+    });
+    audioBloc.add(PlayAudioEvent());
   }
 
   pauseAudio() async {
+    setState(() {
+      isLoading = true;
+    });
     audioBloc.add(StopAudioEvent());
     if (mounted) {
       setState(() {
         isPlaying = false;
       });
     }
-    await audioBloc.audioPlayer.pause();
+    var result = await audioBloc.audioPlayer.pause();
+    print("pause result $result");
+
+    setState(() {
+      isLoading = false;
+    });
   }
 
   stopAudio() async {
+    setState(() {
+      isLoading = true;
+    });
+    var result = await audioBloc.audioPlayer.stop();
+    print("stop result $result");
+
     audioBloc.add(StopAudioEvent());
     if (mounted) {
       setState(() {
         isPlaying = false;
       });
     }
-    await audioBloc.audioPlayer.stop();
+    setState(() {
+      isLoading = false;
+    });
   }
 
   resume() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    var result = await audioBloc.audioPlayer.resume();
+    print("resume result $result");
     audioBloc.add(PlayAudioEvent());
     if (mounted) {
       setState(() {
         isPlaying = true;
       });
     }
-    await audioBloc.audioPlayer.resume();
+    setState(() {
+      isLoading = false;
+    });
   }
 
   seek(value) async {
+    setState(() {
+      isLoading = true;
+    });
     print("seeking to $value");
-    await audioBloc.audioPlayer.seek(Duration(milliseconds: value * 1000));
+    var result = await audioBloc.audioPlayer.seek(Duration(seconds: value));
+    print("seeking result $result");
+    setState(() {
+      isLoading = false;
+    });
   }
 
   @override
@@ -336,6 +378,9 @@ class _PlayingNowPageState extends State<PlayingNowPage> {
                                         }
                                       },
                                       builder: (context, state) {
+                                        if (isLoading) {
+                                          return CircularProgressIndicator();
+                                        }
                                         if (state is PlayingAudioState) {
                                           return SvgPicture.asset(
                                             "assets/icons/pause.svg",
