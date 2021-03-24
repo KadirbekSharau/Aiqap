@@ -188,7 +188,7 @@ class _BookPageState extends State<BookPage> {
               EdgeInsets.symmetric(horizontal: ScreenUtil().setHeight(50.0)),
           child: Column(
             children: [
-              Text(
+              SelectableText(
                 "'Қаһар' романы – 'Көшпенділер' трилогиясының үшінші кітабы. Роман – қазақ тарихи романистикасының үздік табысы, шоқтығы биік туынды. Қазақ әдебиеті тарихында құбылыс болған ел тағдырын шыншылдықпен бейнелеген халықтық көркем шығарма. Роман авторы – Ілияс Есенберлин.",
                 style: TextStyle(
                   color: Colors.black,
