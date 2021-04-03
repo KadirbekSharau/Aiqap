@@ -14,10 +14,12 @@ dependencies:
 
   flutter_screenutil: ^4.0.4+1
   flutter_bloc: ^7.0.0
-  flutter_svg: ^0.19.3
+  flutter_svg: any
   equatable: ^2.0.0
   http: ^0.13.1
   audioplayers: ^0.18.3
+  cached_network_image: any
+
 
 dev_dependencies:
   flutter_test:

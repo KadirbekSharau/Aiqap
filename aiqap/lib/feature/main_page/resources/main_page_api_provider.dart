@@ -6,10 +6,11 @@ import 'package:http/http.dart';
 
 class MainPageApiProvider {
   Future<List<Book>> fetchBooksList() async {
-    var uri = Uri.parse("$BACKEND_URL/http://57d35b8d3f5c.ngrok.io/api/posts/");
-    var response = await get(uri);
-    var jsonList = json.decode(utf8.decode(response.bodyBytes));
+    var uri = Uri.parse("$BACKEND_URL/api/posts/");
+    var response =
+        await get(uri, headers: {"Content-Type": "application/json"});
     print(response.statusCode);
-    return Book.parseList(jsonList);
+    var jsonList = json.decode(utf8.decode(response.bodyBytes));
+    return Book.parseList(jsonList['results']);
   }
 }

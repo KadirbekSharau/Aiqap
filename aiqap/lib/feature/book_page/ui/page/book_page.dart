@@ -1,33 +1,35 @@
 import 'dart:ui';
 
+import 'package:aiqap/feature/main_page/model/book.dart';
+import 'package:aiqap/feature/main_page/ui/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/screen_util.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:aiqap/feature/playing_now/ui/page/playing_now_page.dart';
 
 class BookPage extends StatefulWidget {
-  final int bookId;
-  BookPage({Key key, this.bookId}) : super(key: key);
+  final Book book;
+  BookPage({Key key, this.book}) : super(key: key);
 
   @override
   _BookPageState createState() => _BookPageState();
 }
 
 class _BookPageState extends State<BookPage> {
+  Book book;
+  @override
+  void initState() {
+    book = widget.book;
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/abay_path.png'),
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
+          book.img == null ? placeholderImage() : networkImage(book.img),
           BackdropFilter(
             filter: ImageFilter.blur(
               sigmaX: 15.0,
@@ -76,6 +78,9 @@ class _BookPageState extends State<BookPage> {
       children: [
         SizedBox(height: ScreenUtil().setHeight(50.0)),
         ClipRRect(
+          borderRadius: BorderRadius.circular(
+            ScreenUtil().setHeight(100.0),
+          ),
           child: BackdropFilter(
             filter: ImageFilter.blur(
               sigmaX: 18.0,
@@ -98,12 +103,11 @@ class _BookPageState extends State<BookPage> {
                   ]),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(
-                  ScreenUtil().setHeight(30.0),
+                  ScreenUtil().setHeight(100.0),
                 ),
-                child: Image.asset(
-                  "assets/abay_path.png",
-                  fit: BoxFit.cover,
-                ),
+                child: book.img == null
+                    ? placeholderImage()
+                    : networkImage(book.img),
               ),
             ),
           ),
@@ -127,10 +131,12 @@ class _BookPageState extends State<BookPage> {
             ),
           ),
           InkWell(
-            onTap: () {Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => PlayingNowPage()),
-            );},
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => PlayingNowPage()),
+              );
+            },
             child: SvgPicture.asset(
               "assets/icons/play.svg",
               height: ScreenUtil().setHeight(130.0),
@@ -175,8 +181,17 @@ class _BookPageState extends State<BookPage> {
         child: Column(
           children: [
             SizedBox(height: ScreenUtil().setHeight(100.0)),
+            Text(
+              '${book.title}',
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.w600,
+                fontSize: ScreenUtil().setSp(70.0),
+              ),
+            ),
+            SizedBox(height: ScreenUtil().setHeight(30.0)),
             actionsContainer(),
-            SizedBox(height: ScreenUtil().setHeight(60.0)),
+            SizedBox(height: ScreenUtil().setHeight(30.0)),
             descriptionText(),
           ],
         ),
@@ -193,7 +208,7 @@ class _BookPageState extends State<BookPage> {
           child: Column(
             children: [
               SelectableText(
-                "'Қаһар' романы – 'Көшпенділер' трилогиясының үшінші кітабы. Роман – қазақ тарихи романистикасының үздік табысы, шоқтығы биік туынды. Қазақ әдебиеті тарихында құбылыс болған ел тағдырын шыншылдықпен бейнелеген халықтық көркем шығарма. Роман авторы – Ілияс Есенберлин.",
+                "${book.description}",
                 style: TextStyle(
                   color: Colors.black,
                   fontSize: ScreenUtil().setSp(50.0),

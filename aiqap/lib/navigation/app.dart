@@ -66,7 +66,7 @@ class _AppState extends State<App> {
                   List args = settings.arguments;
                   return MaterialPageRoute(
                     builder: (context) => BookPage(
-                      bookId: args[0],
+                      book: args[0],
                     ),
                   );
                 }
