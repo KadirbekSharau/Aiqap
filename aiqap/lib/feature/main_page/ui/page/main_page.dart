@@ -40,6 +40,8 @@ class _MainPageState extends State<MainPage> {
       child: Scaffold(
         body: Container(
           margin: EdgeInsets.only(top: 50),
+          padding:
+              EdgeInsets.symmetric(horizontal: ScreenUtil().setHeight(40.0)),
           child: Column(
             children: [
               searchBar(),
@@ -72,14 +74,7 @@ class _MainPageState extends State<MainPage> {
                                         height: ScreenUtil().setHeight(100.0)),
                                     Container()
                                   ] +
-                                  state.ganres
-                                      .map(
-                                        (e) => bookSection(
-                                          heading: e.janre,
-                                          bookList: e.books,
-                                        ),
-                                      )
-                                      .toList(),
+                                  state.books.map((e) => book(e)).toList(),
                             ),
                           );
                         }
@@ -127,6 +122,21 @@ class _MainPageState extends State<MainPage> {
               ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget book(Book book) {
+    return Container(
+      height: ScreenUtil().setHeight(500.0),
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(ScreenUtil().setHeight(30.0)),
+        boxShadow: [
+          BoxShadow(
+              color: Colors.black, blurRadius: ScreenUtil().setHeight(5.0))
         ],
       ),
     );

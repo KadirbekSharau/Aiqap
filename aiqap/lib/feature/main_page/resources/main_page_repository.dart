@@ -3,7 +3,7 @@ import 'package:aiqap/feature/main_page/resources/main_page_api_provider.dart';
 
 class MainPageRepository {
   MainPageApiProvider _apiProvider = MainPageApiProvider();
-  Future<List<Genre>> fetchBooksByGenre() async {
-    return await _apiProvider.fetchBooksByGenre();
+  Future<List<Book>> fetchBooksList() async {
+    return await _apiProvider.fetchBooksList();
   }
 }

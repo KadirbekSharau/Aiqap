@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:aiqap/feature/main_page/model/book.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class DownloadedBooksPage extends StatefulWidget {
@@ -10,7 +9,7 @@ class DownloadedBooksPage extends StatefulWidget {
 }
 
 class _DownloadedBooksPageState extends State<DownloadedBooksPage> {
-  List<Book> bookList = booksList;
+  // List<Book> bookList = booksList;
 
   @override
   Widget build(BuildContext context) {
@@ -25,8 +24,8 @@ class _DownloadedBooksPageState extends State<DownloadedBooksPage> {
       body: Container(
         child: SingleChildScrollView(
           child: Column(
-            children: bookList.map((book) => downloadedBook()).toList(),
-          ),
+              // children: bookList.map((book) => downloadedBook()).toList(),
+              ),
         ),
       ),
     );

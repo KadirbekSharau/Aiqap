@@ -12,8 +12,8 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
     if (event is FetchGanresEvent) {
       yield LoadingMainPageState();
       try {
-        var genres = await _repository.fetchBooksByGenre();
-        yield FetchedBooksByGanreState(genres);
+        var books = await _repository.fetchBooksList();
+        yield FetchedBooksByGanreState(books);
       } catch (e) {
         yield ErrorMainPageState(e.toString());
       }
@@ -22,8 +22,8 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
     if (event is SearchBookEvent) {
       yield LoadingMainPageState();
       try {
-        var genres = await _repository.fetchBooksByGenre();
-        yield FetchedBooksByGanreState(genres);
+        var books = await _repository.fetchBooksList();
+        yield FetchedBooksByGanreState(books);
       } catch (e) {
         yield ErrorMainPageState(e.toString());
       }

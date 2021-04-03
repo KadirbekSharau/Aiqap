@@ -78,7 +78,7 @@ class _AppState extends State<App> {
                 return MaterialPageRoute(builder: (context) => Scaffold());
               },
               home: Scaffold(
-                resizeToAvoidBottomPadding: true,
+                resizeToAvoidBottomInset: true,
                 floatingActionButton: controlBtn(),
                 floatingActionButtonLocation:
                     FloatingActionButtonLocation.centerDocked,

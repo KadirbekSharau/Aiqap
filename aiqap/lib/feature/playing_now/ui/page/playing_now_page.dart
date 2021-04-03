@@ -361,7 +361,7 @@ class _PlayingNowPageState extends State<PlayingNowPage> {
                                       ]),
                                   child: Center(
                                     child: BlocConsumer<AudioBloc, AudioState>(
-                                      cubit: audioBloc,
+                                      bloc: audioBloc,
                                       listener: (context, state) {
                                         if (state is PlayingAudioState) {
                                           if (mounted) {

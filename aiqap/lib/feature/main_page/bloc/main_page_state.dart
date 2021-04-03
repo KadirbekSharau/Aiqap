@@ -15,7 +15,7 @@ class ErrorMainPageState extends MainPageState {
 }
 
 class FetchedBooksByGanreState extends MainPageState {
-  final List<Genre> ganres;
+  final List<Book> books;
 
-  FetchedBooksByGanreState(this.ganres);
+  FetchedBooksByGanreState(this.books);
 }
