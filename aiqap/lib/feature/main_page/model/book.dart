@@ -6,7 +6,7 @@ class Book {
   final Author author;
   final String title;
   final String description;
-  final String audio;
+  String audio;
   final String img;
   final String release;
   final String upload;
@@ -35,5 +35,27 @@ class Book {
       list.add(Book.parseJson(obj));
     }
     return list;
+  }
+
+  Object getMap() {
+    return {
+      "id": id,
+      "author": {
+        "id": author.id,
+        "full_name": author.fullName,
+        "birth_date": author.birthDate,
+      },
+      "title": title,
+      "description": description,
+      "audio": audio,
+      "image": img,
+      "release": release,
+      "upload": upload,
+      "category": {
+        "id": category.id,
+        "name": category.name,
+        "created": category.createdDate,
+      }
+    };
   }
 }

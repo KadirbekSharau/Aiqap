@@ -19,6 +19,11 @@ dependencies:
   http: ^0.13.1
   audioplayers: ^0.18.3
   cached_network_image: any
+  provider: ^5.0.0
+  dio: ^4.0.0
+  path_provider: ^2.0.1
+  permission_handler: ^6.1.1
+  shared_preferences: ^2.0.5
 
 
 dev_dependencies:

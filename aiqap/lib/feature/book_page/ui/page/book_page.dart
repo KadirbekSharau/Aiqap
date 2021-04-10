@@ -1,11 +1,14 @@
+import 'dart:io';
 import 'dart:ui';
-
+import 'package:aiqap/feature/book_page/ui/widgets/book_page_widgets.dart';
+import 'package:aiqap/feature/downloaded_books/resources/downloads_repository.dart';
 import 'package:aiqap/feature/main_page/model/book.dart';
 import 'package:aiqap/feature/main_page/ui/widgets/widgets.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/screen_util.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:aiqap/feature/playing_now/ui/page/playing_now_page.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class BookPage extends StatefulWidget {
   final Book book;
@@ -16,16 +19,132 @@ class BookPage extends StatefulWidget {
 }
 
 class _BookPageState extends State<BookPage> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+
+  final Dio dio = Dio();
   Book book;
+  bool loading = false;
+  double progress = 0;
   @override
   void initState() {
     book = widget.book;
     super.initState();
   }
 
+  Future<bool> saveFile(Book book) async {
+    if (book == null || book.audio == null || book.audio == "") return false;
+    Directory directory;
+    try {
+      if (Platform.isAndroid) {
+        if (await getPermission(Permission.storage)) {
+          //
+          directory = await getExternalStorageDirectory();
+          String newPath = "";
+          List<String> folders = directory.path.split("/");
+          for (int i = 1; i < folders.length; i++) {
+            String folder = folders[i];
+            if (folder != "Android") {
+              newPath += "/" + folder;
+            } else {
+              break;
+            }
+          }
+
+          newPath += "/aiqap";
+          directory = Directory(newPath);
+        } else {
+          return false;
+        }
+      } else {
+        //not implemented
+      }
+
+      if (!await directory.exists()) {
+        await directory.create(recursive: true);
+      }
+
+      if (await directory.exists()) {
+        File savedFile = File(directory.path + "/${book.title}_${book.id}.mp3");
+        if (await savedFile.exists()) return true;
+        await dio.download(
+          book.audio,
+          savedFile.path,
+          onReceiveProgress: (downloaded, totalSize) {
+            if (mounted) {
+              setState(
+                () {
+                  progress = downloaded / totalSize;
+                },
+              );
+            }
+          },
+        );
+        return true;
+      }
+    } catch (e) {
+      //
+      print(e);
+    }
+  }
+
+  Future<bool> getPermission(Permission permission) async {
+    if (await permission.isGranted) {
+      return true;
+    } else {
+      var res = await permission.request();
+      if (res == PermissionStatus.granted) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  }
+
+  downloadBook(Book book) async {
+    if (loading) return;
+    setState(() {
+      loading = true;
+    });
+
+    if (!await saveFile(book)) {
+      ScaffoldMessenger.of(_scaffoldKey.currentContext).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.red,
+          content: Container(
+            child: Text(
+              "Қателік орын алды!",
+              style: TextStyle(
+                  color: Colors.white, fontSize: ScreenUtil().setHeight(40.0)),
+            ),
+          ),
+        ),
+      );
+    } else {
+      DownloadsRepository repository = DownloadsRepository();
+      repository.saveBookDetails(book);
+      ScaffoldMessenger.of(_scaffoldKey.currentContext).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.green,
+          content: Container(
+            child: Text(
+              "Сәтті жүктелді!",
+              style: TextStyle(
+                  color: Colors.white, fontSize: ScreenUtil().setHeight(40.0)),
+            ),
+          ),
+        ),
+      );
+    }
+
+    setState(() {
+      loading = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       backgroundColor: Colors.black,
       body: Stack(
         children: [
@@ -63,9 +182,9 @@ class _BookPageState extends State<BookPage> {
                   ],
                 ),
               ),
-              imageContainer(),
+              imageContainer(book),
               SizedBox(height: ScreenUtil().setHeight(100.0)),
-              dataContainer(),
+              dataContainer(book),
             ],
           )
         ],
@@ -73,90 +192,7 @@ class _BookPageState extends State<BookPage> {
     );
   }
 
-  Widget imageContainer() {
-    return Column(
-      children: [
-        SizedBox(height: ScreenUtil().setHeight(50.0)),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(
-            ScreenUtil().setHeight(100.0),
-          ),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(
-              sigmaX: 18.0,
-              sigmaY: 18.0,
-            ),
-            child: Container(
-              height: ScreenUtil().setHeight(800.0),
-              width: ScreenUtil().setHeight(800.0),
-              decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(
-                    ScreenUtil().setHeight(30.0),
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.5),
-                      blurRadius: ScreenUtil().setHeight(100.0),
-                      spreadRadius: ScreenUtil().setHeight(100.0),
-                    ),
-                  ]),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(
-                  ScreenUtil().setHeight(100.0),
-                ),
-                child: book.img == null
-                    ? placeholderImage()
-                    : networkImage(book.img),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget actionsContainer() {
-    return Container(
-      width: ScreenUtil().setHeight(800),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          InkWell(
-            onTap: () {},
-            child: SvgPicture.asset(
-              "assets/icons/download.svg",
-              height: ScreenUtil().setHeight(80.0),
-              color: Colors.black,
-            ),
-          ),
-          InkWell(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => PlayingNowPage()),
-              );
-            },
-            child: SvgPicture.asset(
-              "assets/icons/play.svg",
-              height: ScreenUtil().setHeight(130.0),
-              color: Color.fromRGBO(192, 96, 70, 1),
-            ),
-          ),
-          InkWell(
-            onTap: () {},
-            child: SvgPicture.asset(
-              "assets/icons/share.svg",
-              height: ScreenUtil().setHeight(80.0),
-              color: Colors.black,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget dataContainer() {
+  Widget dataContainer(Book book) {
     return Expanded(
       child: Container(
         width: double.infinity,
@@ -180,7 +216,20 @@ class _BookPageState extends State<BookPage> {
         ),
         child: Column(
           children: [
-            SizedBox(height: ScreenUtil().setHeight(100.0)),
+            SizedBox(height: ScreenUtil().setHeight(50.0)),
+            loading
+                ? Padding(
+                    padding: EdgeInsets.symmetric(
+                        horizontal: ScreenUtil().setHeight(50.0)),
+                    child: LinearProgressIndicator(
+                      minHeight: ScreenUtil().setHeight(15),
+                      value: progress,
+                    ),
+                  )
+                : Container(
+                    height: ScreenUtil().setHeight(15.0),
+                  ),
+            SizedBox(height: ScreenUtil().setHeight(50.0)),
             Text(
               '${book.title}',
               style: TextStyle(
@@ -190,33 +239,10 @@ class _BookPageState extends State<BookPage> {
               ),
             ),
             SizedBox(height: ScreenUtil().setHeight(30.0)),
-            actionsContainer(),
+            actionsContainer(book, downloadBook),
             SizedBox(height: ScreenUtil().setHeight(30.0)),
-            descriptionText(),
+            descriptionText(book),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget descriptionText() {
-    return Expanded(
-      child: SingleChildScrollView(
-        child: Padding(
-          padding:
-              EdgeInsets.symmetric(horizontal: ScreenUtil().setHeight(50.0)),
-          child: Column(
-            children: [
-              SelectableText(
-                "${book.description}",
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: ScreenUtil().setSp(50.0),
-                ),
-                textAlign: TextAlign.center,
-              )
-            ],
-          ),
         ),
       ),
     );
