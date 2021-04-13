@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:aiqap/feature/main_page/model/author.dart';
 import 'package:aiqap/feature/main_page/model/category.dart';
 
@@ -11,6 +13,7 @@ class Book {
   final String release;
   final String upload;
   final Category category;
+  File audioFile;
 
   Book(this.id, this.author, this.title, this.description, this.audio, this.img,
       this.release, this.upload, this.category);

@@ -113,7 +113,7 @@ class _DownloadedBooksPageState extends State<DownloadedBooksPage> {
                     text: TextSpan(
                       children: [
                         TextSpan(
-                          text: "Қаһар",
+                          text: "${book.title}",
                           style: TextStyle(
                               color: Color(0xff333333),
                               fontWeight: FontWeight.bold,
@@ -123,7 +123,7 @@ class _DownloadedBooksPageState extends State<DownloadedBooksPage> {
                     ),
                   ),
                   Text(
-                    "Ілияс Есенберлин",
+                    "${book.author.fullName}",
                     style: TextStyle(color: Colors.black),
                     softWrap: false,
                     overflow: TextOverflow.fade,

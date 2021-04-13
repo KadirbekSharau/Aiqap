@@ -1,10 +1,12 @@
 import 'package:aiqap/feature/main_page/model/book.dart';
+import 'package:audioplayers/audio_cache.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/cupertino.dart';
 
 class AudioProvider extends ChangeNotifier {
   Book currentBook;
   AudioPlayer audioPlayer = AudioPlayer();
+  AudioCache audioCache = AudioCache();
   Duration totalDuration;
   Duration position;
   String playerState = "STOP";
@@ -57,11 +59,15 @@ class AudioProvider extends ChangeNotifier {
     stopAudio();
   }
 
-  void playAudio() {
-    print("AUDIO IS ${currentBook.audio}");
-    if (currentBook.audio != null) {
-      print("PLAYING");
-      audioPlayer.play(currentBook.audio, isLocal: true);
+  void playAudio() async {
+    if (currentBook.audioFile != null) {
+      print(currentBook.audioFile.path);
+      var res = await audioPlayer.play(currentBook.audioFile.path);
+      print("PLAY RESULT $res");
+    } else {
+      if (currentBook.audio != null) {
+        audioPlayer.play(currentBook.audio);
+      }
     }
   }
 

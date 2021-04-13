@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:aiqap/feature/main_page/model/book.dart';
+import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -34,7 +36,7 @@ class DownloadsRepository {
       }
       Book b = await getBookDetails(id);
       if (b != null) {
-        b.audio = f.toString();
+        b.audioFile = File(f.toString());
         books.add(b);
       }
     }

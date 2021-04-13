@@ -1,6 +1,5 @@
 import 'package:aiqap/feature/audioProvider/audio_provider.dart';
 import 'package:aiqap/feature/book_page/ui/widgets/book_page_widgets.dart';
-import 'package:aiqap/feature/main_page/model/book.dart';
 import 'package:aiqap/feature/main_page/ui/widgets/widgets.dart';
 import 'package:aiqap/feature/playing_now/ui/widgets/widgets.dart';
 import 'package:flutter/material.dart';
